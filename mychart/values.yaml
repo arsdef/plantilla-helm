@@ -1,0 +1,23 @@
+replicaCount: 2
+image:
+  repository: myrepo/myapp
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  hostname: myapp.example.com
+  annotations: {}
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+env:
+  - name: EXAMPLE_ENV
+    value: "example-value"
