@@ -9,6 +9,7 @@
 ### │   ├── ingress.yaml
 ### │   ├── configmap.yaml
 ### │   ├── secret.yaml
+### |   ├── hpa.yaml
 ### │   ├── _helpers.tpl
 ### │   └── NOTES.txt
 ## ├── Chart.yaml
@@ -161,6 +162,50 @@ type: Opaque: Este campo especifica el tipo de secreto. Opaque es el tipo más c
 data: Este bloque contiene los datos del secreto.
 
 my-secret-key: {{ .Values.secretKey | b64enc }}: Aquí se define una clave my-secret-key que almacenará los datos del secreto. Se utiliza otra plantilla para acceder a un valor del archivo de valores (.Values.secretKey) y se codifica en Base64 (| b64enc) antes de almacenarlo.
+
+## hpa.yaml:
+archivo de configuración en formato YAML utilizado para definir un Horizontal Pod Autoscaler (HPA) en un clúster de Kubernetes, gestionado a través de Helm. A continuación se explica cada parte del código:
+
+Condicional: {{- if .Values.hpa.enabled }}
+
+Esta línea inicia un bloque condicional que verifica si la opción de HPA está habilitada en el archivo de valores de Helm (.Values.hpa.enabled). Si está habilitada, se ejecuta el código que sigue.
+Versiones y tipo:
+
+apiVersion: autoscaling/v2
+Define la versión de la API que se utiliza para el HPA.
+kind: HorizontalPodAutoscaler
+Especifica que este recurso es un Horizontal Pod Autoscaler.
+Metadatos:
+
+metadata:
+Proporciona metadatos sobre el recurso.
+name: {{ .Release.Name }}-hpa
+Asigna un nombre al HPA usando el nombre de la liberación (.Release.Name) concatenado con -hpa.
+Especificaciones:
+
+spec:
+Define las especificaciones del HPA.
+scaleTargetRef:
+Indica el objetivo al que se aplicará el escalado.
+apiVersion: apps/v1
+Define la versión de la API del objetivo.
+kind: Deployment
+Especifica que el objetivo es un Deployment.
+name: {{ .Release.Name }}-app
+Define el nombre del Deployment al que se refiere el HPA, usando el nombre de la liberación y agregando -app.
+Réplicas:
+
+minReplicas: {{ .Values.hpa.minReplicas }}
+Establece el número mínimo de réplicas que se deben mantener.
+maxReplicas: {{ .Values.hpa.maxReplicas }}
+Establece el número máximo de réplicas que el HPA puede escalar.
+Objetivo de utilización de CPU:
+
+targetCPUUtilizationPercentage: {{ .Values.hpa.targetCPUUtilizationPercentage }}
+Define el porcentaje objetivo de utilización de CPU para activar el escalado. Si la utilización de CPU promedio de las réplicas supera este valor, el HPA aumentará el número de réplicas.
+Fin del bloque condicional: {{- end }}
+
+Esta línea cierra el bloque condicional que comenzó con if.
 ## _helpers.tpl:
 Contiene funciones auxiliares que se pueden usar en otras plantillas para evitar la duplicación de código.
 explicacion de  su uso y propósito:
