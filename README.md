@@ -1,18 +1,18 @@
 # plantilla-helm
 
 ## Estructura 
-mychart/
-├── charts/
-├── templates/
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   ├── ingress.yaml
-│   ├── configmap.yaml
-│   ├── secret.yaml
-│   ├── _helpers.tpl
-│   └── NOTES.txt
-├── Chart.yaml
-└── values.yaml
+# mychart/
+## ├── charts/
+## ├── templates/
+### │   ├── deployment.yaml
+### │   ├── service.yaml
+###│   ├── ingress.yaml
+### │   ├── configmap.yaml
+### │   ├── secret.yaml
+### │   ├── _helpers.tpl
+### │   └── NOTES.txt
+## ├── Chart.yaml
+## └── values.yaml
 
 
 representa la estructura de directorios de un gráfico (chart) de Helm, que es una herramienta de gestión de paquetes para Kubernetes. A continuación, te explico cada componente de la estructura:
