@@ -13,7 +13,34 @@ ingress:
   hostname: myapp.example.com
   annotations: {}
 
-resources: {}
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+
+probes:
+  liveness:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 3
+    path: /health
+  readiness:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+    path: /ready
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
 nodeSelector: {}
 tolerations: []
 affinity: {}
@@ -21,3 +48,4 @@ affinity: {}
 env:
   - name: EXAMPLE_ENV
     value: "example-value"
+
