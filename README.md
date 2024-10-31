@@ -31,31 +31,29 @@ Aquí se encuentran las plantillas de recursos de Kubernetes que Helm utilizará
 Define un despliegue de Kubernetes, que especifica cómo se deben crear y administrar los pods.
 A continuación se presenta una explicación clara y concisa de cada parte:
 
-apiVersion: apps/v1: Indica la versión de la API de Kubernetes que se está utilizando, en este caso, la versión v1 del grupo de API de aplicaciones.
+apiVersion: apps/v1: Especifica la versión de la API de Kubernetes para el recurso Deployment.
 
-kind: Deployment: Especifica que el recurso que se está definiendo es un Deployment.
+kind: Deployment: Define el tipo de recurso, que en este caso es un Deployment, que se utiliza para gestionar un conjunto de réplicas de una aplicación.
 
-metadata: Contiene información sobre el Deployment:
+metadata: Contiene información básica sobre el Deployment, como su nombre y etiquetas. El nombre se genera a partir del nombre del release y se asocia a una etiqueta que se usa para seleccionar recursos.
 
-name: El nombre del Deployment se construye a partir del nombre del lanzamiento (Release) y se le añade "-app".
-labels: Se asignan etiquetas para identificar el Deployment, basándose también en el nombre del lanzamiento.
-spec: Define la configuración deseada para el Deployment:
+spec: Describe la especificación del Deployment:
 
-replicas: Especifica cuántas copias (réplicas) del contenedor se deben estar ejecutando.
-selector: Define cómo seleccionar los Pods que este Deployment debe gestionar, coincidiendo con las etiquetas especificadas.
-template: Especifica la plantilla para los Pods que se crearán:
-metadata: Contiene etiquetas para el Pod, similar a las del Deployment.
-spec: Detalla la especificación del contenedor:
-containers: Lista de contenedores que se ejecutarán en el Pod:
-name: Nombre del contenedor.
-image: Define la imagen del contenedor, que utiliza valores de variables dinámicas como el repositorio y la etiqueta de la imagen.
-imagePullPolicy: Política de obtención de la imagen (por ejemplo, si debe actualizar la imagen cada vez).
-ports: Especifica los puertos en los que el contenedor está escuchando (en este caso, el puerto 80).
-env: Define las variables de entorno, utilizando un bucle para iterar sobre las definiciones de variables de entorno proporcionadas en los valores.
-resources: (opcional) Establece los recursos (CPU y memoria) requeridos por el contenedor, si están definidos en los valores.
-nodeSelector: Indica en qué nodos debe ejecutarse el Pod, según las etiquetas de los nodos.
-tolerations: Configura las tolerancias, permitiendo que el Pod se ejecute en nodos con ciertas "tolerancias" (es decir, capacidades de manejar condiciones específicas).
-affinity: Define reglas de afinidad para determinar en qué nodos se deben programar los Pods, en base a las relaciones con otros Pods o nodos.
+replicas: El número de instancias (réplicas) de la aplicación que se desean ejecutar, tomado de los valores de configuración.
+selector: Define cómo Kubernetes debe encontrar las Pods que pertenecen a este Deployment mediante la coincidencia de etiquetas.
+template: Define la plantilla de Pod que se utilizará:
+metadata: Proporciona el mismo conjunto de etiquetas que se usa en el selector.
+spec: Describe la configuración de los contenedores que se ejecutarán en el Pod:
+containers: Lista los contenedores que se ejecutan en el Pod. Para cada contenedor se define:
+name: El nombre del contenedor.
+image: La imagen del contenedor, incluyendo el repositorio y la etiqueta.
+imagePullPolicy: Define cuándo se debe descargar la imagen.
+ports: Especifica los puertos que los contenedores exponen.
+env: Define variables de entorno para los contenedores, iterando sobre una lista de variables desde la configuración.
+probes: Incluye definiciones de sondas de prueba para liveness (vida) y readiness (listo) si están habilitadas en los valores de configuración. Estas sondas ayudan a Kubernetes a determinar si el contenedor está funcionando correctamente o listo para recibir tráfico.
+resources: Especifica los límites y solicitudes de recursos (CPU y memoria) para el contenedor.
+nodeSelector, tolerations, affinity: Estas configuraciones permiten especificar en qué nodos del clúster se deben ejecutar los Pods, considerando tolerancias y afinidades para cumplir con los requisitos de colocación.
+Este manifiesto se usa comúnmente junto con Helm, ya que contiene plantillas (indicado por {{ ... }}) que se reemplazan por valores específicos al momento de realizar el despliegue.
 ## service.yaml:
 Define un servicio de Kubernetes, que expone los pods a la red y permite la comunicación interna/externa.
 explicación de cada parte:
@@ -233,33 +231,51 @@ appVersion: "1.0": Indica la versión de la aplicación que se está empaquetand
 En resumen, este archivo describe un chart de Helm que se utilizará para desplegar una aplicación en Kubernetes, proporcionando información sobre su nombre, descripción y versiones.
 
 ## values.yaml:
-Este archivo define los valores por defecto para las variables que se utilizan en las plantillas. Permite personalizar la configuración del gráfico durante la instalación o actualización.
-A continuación se explican las secciones más importantes:
-
 replicaCount: 2
-Indica que deben ejecutarse dos réplicas de la aplicación para garantizar disponibilidad y escalabilidad.
+
+Define el número de réplicas del pod que se deben crear. En este caso, se crean 2 réplicas.
 image:
-repository: myrepo/myapp: Especifica el repositorio de la imagen de contenedor que se va a utilizar. En este caso, se encuentra en "myrepo" y se llama "myapp".
-tag: "latest": Indica que se debe utilizar la etiqueta "latest" de la imagen, que normalmente corresponde a la versión más reciente.
-pullPolicy: IfNotPresent: Esta política determina que el sistema solo descargará la imagen si no está ya presente en el nodo.
+
+repository: Especifica el repositorio de la imagen del contenedor, en este caso, myrepo/myapp.
+tag: Indica la etiqueta de la imagen, que se establece como "latest".
+pullPolicy: Define la política de descarga de la imagen. "IfNotPresent" significa que se descargará la imagen solo si no está presente en el nodo.
 service:
-type: ClusterIP: Define que el servicio solo será accesible dentro del clúster de Kubernetes.
-port: 80: Especifica que el servicio escuchará en el puerto 80.
+
+type: Tipo de servicio, "ClusterIP" significa que el servicio será accesible solo dentro del clúster.
+port: El puerto en el que estará expuesto el servicio, que es el 80.
 ingress:
-enabled: true: Indica que el ingreso (Ingress) está habilitado, lo que permite el acceso externo a la aplicación.
-hostname: myapp.example.com: Define el nombre de dominio a través del cual se accederá a la aplicación.
-annotations: {}: Un campo para agregar anotaciones adicionales, aunque en este caso no se han definido.
+
+enabled: Si está habilitado o no, aquí está habilitado.
+hostname: El nombre de dominio bajo el cual se accederá a la aplicación (myapp.example.com).
+annotations: Permite añadir anotaciones adicionales al recurso de ingreso.
 resources:
-Este campo se utiliza para definir los recursos (CPU, memoria) que se asignarán a los pods. Está vacío, lo que significa que no se han especificado configuraciones.
-nodeSelector:
-Permite seleccionar en qué nodos debe ejecutarse el pod basado en etiquetas. Está vacío, lo que sugiere que no se han establecido restricciones.
-tolerations:
-Es permite que los pods sean programados en nodos con ciertas "tolerancias" (puedes pensar en esto como excepciones a los "taints" de los nodos). Aquí también está vacío.
-affinity:
-Permite especificar reglas avanzadas sobre cómo los pods deben ser asignados a los nodos, en función de etiquetas. Este campo también está vacío.
+
+limits: Define los recursos máximos que puede usar el pod, en este caso, 500 milicores de CPU y 512 MiB de memoria.
+requests: Establece la cantidad mínima de recursos que se garantiza para el pod, 200 milicores de CPU y 256 MiB de memoria.
+probes:
+
+liveness: Configura la sonda de vivacidad para verificar si la aplicación está viva.
+initialDelaySeconds: Espera 10 segundos antes de iniciar la comprobación.
+periodSeconds: Comprueba cada 10 segundos.
+failureThreshold: Permite 3 fallos antes de reiniciar el pod.
+path: URL a consultar para la verificación.
+readiness: Configura la sonda de disponibilidad.
+initialDelaySeconds: Espera 5 segundos antes de iniciar la comprobación.
+periodSeconds: Comprueba cada 10 segundos.
+failureThreshold: Permite 3 fallos antes de considerar el pod no listo.
+path: URL a consultar para la verificación.
+hpa (Horizontal Pod Autoscaler):
+
+enabled: Activa el escalador automático.
+minReplicas: Número mínimo de réplicas que se mantendrán, en este caso 2.
+maxReplicas: Número máximo de réplicas que pueden escalarse, aquí 10.
+targetCPUUtilizationPercentage: Porcentaje de utilización de CPU que se utilizará como objetivo para la escala automática, 80%.
+nodeSelector, tolerations, affinity:
+
+Secciones para controlar cómo se programan los pods en los nodos del clúster, pero están vacías aquí, lo que significa que no hay restricciones específicas.
 env:
-- name: EXAMPLE_ENV: Define una variable de entorno para el pod.
-value: "example-value": Establece el valor de la variable de entorno a "example-value".
 
-
-En resumen, esta estructura es típica de un gráfico de Helm, donde se gestionan los recursos necesarios para desplegar una aplicación en Kubernetes.
+Define las variables de entorno que se pasarán al pod.
+name: Nombre de la variable (EXAMPLE_ENV).
+value: Valor que tendrá la variable ("example-value").
+En resumen, este archivo define la configuración necesaria para desplegar una aplicación en Kubernetes, incluyendo el número de réplicas, información del contenedor, configuración del servicio, sonda de salud, escala
