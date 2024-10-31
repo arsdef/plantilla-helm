@@ -1,0 +1,3 @@
+Tu aplicación ha sido desplegada en el clúster.
+Verifica el estado de la aplicación con los siguientes comandos:
+kubectl get all -l app={{ .Release.Name }}
