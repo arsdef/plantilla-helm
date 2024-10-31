@@ -6,7 +6,7 @@
 ## ├── templates/
 ### │   ├── deployment.yaml
 ### │   ├── service.yaml
-###│   ├── ingress.yaml
+### │   ├── ingress.yaml
 ### │   ├── configmap.yaml
 ### │   ├── secret.yaml
 ### │   ├── _helpers.tpl
