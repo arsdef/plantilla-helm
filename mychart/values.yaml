@@ -1,51 +1,79 @@
-replicaCount: 2
-image:
-  repository: myrepo/myapp
-  tag: "latest"
-  pullPolicy: IfNotPresent
+# values.yaml  
 
-service:
-  type: ClusterIP
-  port: 80
+vault:  
+  enabled: true  
+  address: "http://vault-address:8200"  # Dirección de tu servidor Vault  
+  token: ""  # Mantener vacío; el token debería almacenarse como un Secret en Kubernetes  
+  secretPath: "secret/myapp"  # Ruta del secreto en Vault  
 
-ingress:
-  enabled: true
-  hostname: myapp.example.com
-  annotations: {}
+replicaCount: 2  
 
-resources:
-  limits:
-    cpu: "500m"
-    memory: "512Mi"
-  requests:
-    cpu: "200m"
-    memory: "256Mi"
+image:  
+  repository: myrepo/myapp  # Repositorio de la imagen de tu aplicación  
+  tag: "latest"  # Etiqueta de la imagen  
+  pullPolicy: IfNotPresent  # Política de obtención de imágenes  
 
-probes:
-  liveness:
-    enabled: true
-    initialDelaySeconds: 10
-    periodSeconds: 10
-    failureThreshold: 3
-    path: /health
-  readiness:
-    enabled: true
-    initialDelaySeconds: 5
-    periodSeconds: 10
-    failureThreshold: 3
-    path: /ready
+service:  
+  type: ClusterIP  
+  port: 80  
 
-hpa:
-  enabled: true
-  minReplicas: 2
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
+ingress:  
+  enabled: true  
+  hostname: myapp.example.com  
+  annotations: {}  
 
-nodeSelector: {}
-tolerations: []
-affinity: {}
+resources:  
+  limits:  
+    cpu: "500m"  
+    memory: "512Mi"  
+  requests:  
+    cpu: "200m"  
+    memory: "256Mi"  
 
-env:
-  - name: EXAMPLE_ENV
-    value: "example-value"
+probes:  
+  liveness:  
+    enabled: true  
+    initialDelaySeconds: 10  
+    periodSeconds: 10  
+    failureThreshold: 3  
+    path: /health  
+  readiness:  
+    enabled: true  
+    initialDelaySeconds: 5  
+    periodSeconds: 10  
+    failureThreshold: 3  
+    path: /ready  
+
+hpa:  
+  enabled: true  
+  minReplicas: 2  
+  maxReplicas: 10  
+  targetCPUUtilizationPercentage: 80  
+
+nodeSelector: {}  
+tolerations: []  
+affinity: {}  
+
+env:  
+  - name: EXAMPLE_ENV  
+    value: "example-value"  
+
+# Configuración para crear el Secret en Kubernetes  
+k8sSecret:  
+  name: "myapp-secret"  # Nombre del secreto en Kubernetes  
+  data:  
+    mysecretkey: "<base64_encoded_value>"  # Placeholder para el valor codificado en base64  
+
+# Configuración para el Job que obtiene secretos de Vault  
+job:  
+  name: "vault-to-k8s-secret"  
+  image: "vault:latest"  
+  command: ['sh', '-c', 'vault kv get -format=json {{ .Values.vault.secretPath }} | jq -r ".data.data" > /mnt/secrets/myapp.json']  
+  restartPolicy: OnFailure  
+  volumeMounts:  
+    - name: secret-volume  
+      mountPath: /mnt/secrets  
+  volumes:  
+    - name: secret-volume  
+      emptyDir: {}  
 
