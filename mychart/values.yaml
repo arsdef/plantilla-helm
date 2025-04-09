@@ -1,85 +1,100 @@
 # Configuración para Vault
 vault:
-  enabled: true
-  address: "http://vault-address:8200"  # Dirección de Vault
-  tokenSecretName: "vault-token-secret"  # Nombre del Secret con el token
-  tokenSecretKey: "token"  # Clave del Secret que contiene el token
-  secretPath: "secret/myapp"  # Ruta del secreto en Vault
+  enabled: true  # Habilita la integración con Vault para gestión de secretos
+  address: "http://vault-address:8200"  # Dirección del servidor de Vault. Cambia según tu configuración.
+  tokenSecretName: "vault-token-secret"  # Nombre del Secret que contiene el token de Vault.
+  tokenSecretKey: "token"  # Clave dentro del Secret que contiene el token de Vault.
+  secretPath: "secret/myapp"  # Ruta en Vault desde donde se obtendrán los secretos.
 
 # Configuración para el Job que obtiene secretos de Vault
 job:
-  enabled: true
-  name: "vault-to-k8s-secret"  # Nombre del Job
-  image: "hashicorp/vault:latest"  # Imagen de Vault
+  enabled: true  # Habilita el Job que obtiene los secretos de Vault y los guarda en Kubernetes
+  name: "vault-to-k8s-secret"  # Nombre del Job de Kubernetes que ejecuta la sincronización de secretos.
+  image: "hashicorp/vault:latest"  # Imagen de Vault utilizada en el Job.
   command: ["sh", "-c", "vault kv get -format=json {{ .Values.vault.secretPath }} | jq -r '.data.data' > /mnt/secrets/myapp.json"]
-  restartPolicy: OnFailure
+  restartPolicy: OnFailure  # Política de reinicio en caso de fallo del Job.
   volumeMounts:
-    - name: secret-volume
-      mountPath: /mnt/secrets
+    - name: secret-volume  # Nombre del volumen que montará los secretos.
+      mountPath: /mnt/secrets  # Ruta en el contenedor donde se montarán los secretos.
   volumes:
     - name: secret-volume
-      emptyDir: {}
+      emptyDir: {}  # Volumen temporal que se utiliza para almacenar los secretos.
 
-# Configuración para el Deployment de la app
+# Configuración para el Deployment de la aplicación
 app:
-  replicaCount: 2
+  replicaCount: 2  # Número de réplicas del Deployment de la aplicación.
   image:
-    repository: myrepo/myapp  # Repositorio de la imagen de la app
-    tag: "latest"  # Etiqueta de la imagen
-    pullPolicy: IfNotPresent  # Política de obtención de la imagen
+    repository: myrepo/myapp  # Repositorio de la imagen Docker de la aplicación.
+    tag: "latest"  # Etiqueta de la imagen.
+    pullPolicy: IfNotPresent  # Política de obtención de la imagen, si no está presente, la descarga.
   service:
-    type: ClusterIP
-    port: 80
+    type: ClusterIP  # Tipo de servicio (ClusterIP, LoadBalancer, NodePort).
+    port: 80  # Puerto que expone el servicio de la aplicación.
 
-# Resource limits and requests for the app container
+# Configuración de recursos para la aplicación
 resources:
   limits:
-    cpu: "500m"
-    memory: "512Mi"
+    cpu: "500m"  # Límite de CPU para el contenedor.
+    memory: "512Mi"  # Límite de memoria para el contenedor.
   requests:
-    cpu: "200m"
-    memory: "256Mi"
+    cpu: "200m"  # Recurso de CPU solicitado para el contenedor.
+    memory: "256Mi"  # Recurso de memoria solicitado para el contenedor.
 
-# Liveness and readiness probes
+# Configuración de sondas de liveness y readiness
 probes:
   liveness:
-    enabled: true
-    initialDelaySeconds: 10
-    periodSeconds: 10
-    failureThreshold: 3
-    path: /health
+    enabled: true  # Habilita la sonda de liveness.
+    initialDelaySeconds: 10  # Tiempo de espera inicial antes de realizar la primera comprobación.
+    periodSeconds: 10  # Frecuencia de las comprobaciones.
+    failureThreshold: 3  # Número de fallos consecutivos permitidos antes de reiniciar el contenedor.
+    path: /health  # Ruta HTTP para la comprobación de liveness.
   readiness:
-    enabled: true
-    initialDelaySeconds: 5
-    periodSeconds: 10
-    failureThreshold: 3
-    path: /ready
+    enabled: true  # Habilita la sonda de readiness.
+    initialDelaySeconds: 5  # Tiempo de espera inicial antes de realizar la primera comprobación.
+    periodSeconds: 10  # Frecuencia de las comprobaciones.
+    failureThreshold: 3  # Número de fallos consecutivos permitidos antes de declarar el contenedor no listo.
+    path: /ready  # Ruta HTTP para la comprobación de readiness.
 
-# Horizontal Pod Autoscaler (HPA)
+# Configuración para el Horizontal Pod Autoscaler (HPA)
 hpa:
-  enabled: true
-  minReplicas: 2
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
+  enabled: true  # Habilita el HPA para escalar los pods basándose en el uso de CPU.
+  minReplicas: 2  # Número mínimo de réplicas que se ejecutarán.
+  maxReplicas: 10  # Número máximo de réplicas que se pueden escalar.
+  targetCPUUtilizationPercentage: 80  # Umbral de utilización de CPU para activar el autoscaling.
 
-# PersistentVolumeClaim (PVC) configuration
+# Configuración para el PersistentVolumeClaim (PVC)
 pvc:
-  enabled: true
-  name: "myapp-pvc"
+  enabled: true  # Habilita la creación de un PVC para almacenamiento persistente.
+  name: "myapp-pvc"  # Nombre del PVC.
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOnce  # Modos de acceso al volumen (ReadWriteOnce, ReadOnlyMany, ReadWriteMany).
   resources:
     requests:
-      storage: "1Gi"  # Tamaño del almacenamiento solicitado
+      storage: "1Gi"  # Tamaño del almacenamiento solicitado para el PVC.
+  storageClassName: "{{ .Values.pvc.storageClassName | default 'standard' }}"  # Tipo de almacenamiento (ej. 'standard', 'fast').
 
-# Ingress configuration
+# Configuración para el Ingress de la aplicación
 ingress:
-  enabled: true
-  hostname: myapp.example.com
-  annotations: {}
+  enabled: true  # Habilita el Ingress para exponer la aplicación fuera del clúster.
+  hostname: myapp.example.com  # Nombre del host para acceder a la aplicación.
+  annotations: {}  # Anotaciones adicionales para el Ingress (ej. configuraciones de reescritura de URL, etc.).
+  tls:
+    - hosts:
+        - myapp.example.com  # Nombre del host para el certificado TLS.
+      secretName: myapp-tls-secret  # Nombre del Secret que contiene el certificado TLS.
 
-# Kubernetes Secrets configuration for storing app-related secrets
+# Configuración de Kubernetes Secrets para almacenar secretos relacionados con la app
 k8sSecret:
-  name: "myapp-secret"  # Nombre del secreto en Kubernetes
+  name: "myapp-secret"  # Nombre del Secret que almacenará secretos de la aplicación.
   data:
-    mysecretkey: "<base64_encoded_value>"  # Placeholder para el valor codificado en base64
+    mysecretkey: "<base64_encoded_value>"  # Placeholder para el valor codificado en base64 del secreto.
+
+# Configuración para la autenticación con Vault usando Kubernetes Auth
+vaultAuth:
+  enabled: true  # Habilita la autenticación automática con Vault usando Kubernetes Auth.
+  role: "myapp-role"  # Nombre del rol de Vault para la autenticación.
+  serviceAccountName: "vault-auth-sa"  # Nombre del ServiceAccount que utilizará Kubernetes Auth.
+  kubernetesAuthMountPath: "auth/kubernetes"  # Ruta en Vault donde se monta el método de autenticación de Kubernetes.
+  tokenSecretName: "vault-token"  # Nombre del Secret que contiene el token necesario para la autenticación.
+  tokenSecretKey: "token"  # Clave del Secret que contiene el token de Vault.
+
