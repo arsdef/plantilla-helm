@@ -1,0 +1,26 @@
+apiVersion: batch/v1  
+kind: Job  
+metadata:  
+  name: vault-to-k8s-secret  
+spec:  
+  template:  
+    spec:  
+      containers:  
+        - name: vault-client  
+          image: vault:latest  
+          env:  
+            - name: VAULT_ADDR  
+              value: "http://vault-address:8200"  
+            - name: VAULT_TOKEN  
+              valueFrom:  
+                secretKeyRef:  
+                  name: vault-token  # Aquí se refiere al Secret que contiene tu token  
+                  key: token         # Clave del token en el Secret  
+          command: ['sh', '-c', 'vault kv get -format=json secret/myapp | jq -r ".data.data" > /mnt/secrets/myapp.json']  
+          volumeMounts:  
+            - name: secret-volume  
+              mountPath: /mnt/secrets  
+      restartPolicy: OnFailure  
+      volumes:  
+        - name: secret-volume  
+          emptyDir: {}  
