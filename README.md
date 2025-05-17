@@ -64,7 +64,7 @@ En resumen, esta plantilla crea un despliegue de Kubernetes para una aplicación
 
 # ConfigMap.yaml
 
-ste código define un ConfigMap en Kubernetes.
+este código define un ConfigMap en Kubernetes.
 
 apiVersion: v1: Indica la versión de la API de Kubernetes que se está utilizando.
 kind: ConfigMap: Especifica que este recurso es un ConfigMap. Los ConfigMaps se usan para almacenar datos de configuración no confidenciales como pares clave-valor.
@@ -93,7 +93,7 @@ targetCPUUtilizationPercentage: : Establece el porcentaje de uso de CPU objetivo
 : Cierra el bloque condicional de Helm.
 En resumen, esta plantilla crea un HPA que automáticamente ajusta el número de pods de un Deployment llamado [nombre-de-la-release]-myapp en función de la utilización de la CPU, manteniendo el número de pods entre un mínimo y un máximo definidos en tu archivo values.yaml. Solo se creará si la opción HPA está habilitada en tu configuración de Helm.
 
-job.yaml
+# job.yaml
 
 define un Job de Kubernetes que se ejecuta una vez.
 
