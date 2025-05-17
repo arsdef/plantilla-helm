@@ -193,17 +193,6 @@ Este enfoque proporciona una solución robusta y segura para el despliegue de ap
 
 
 
-
-
-
-
-Tú dijiste:
-explica todo el helm chart propuesto
-
-
-ChatGPT Plus
-A continuación, te proporciono una explicación detallada del Helm Chart propuesto, que incluye la configuración de Vault, el uso de Kubernetes Secrets, la creación del Deployment, el manejo de probes y recursos, y cómo se parametriza todo a través de un archivo values.yaml.
-
 1. Estructura General del Helm Chart
 El Helm Chart propuesto tiene una estructura básica de un chart de Helm con los siguientes componentes:
 
