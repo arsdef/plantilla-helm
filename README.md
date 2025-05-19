@@ -66,17 +66,25 @@ En resumen, esta plantilla crea un despliegue de Kubernetes para una aplicación
 
 este código define un ConfigMap en Kubernetes.
 
-apiVersion: v1: Indica la versión de la API de Kubernetes que se está utilizando.
-kind: ConfigMap: Especifica que este recurso es un ConfigMap. Los ConfigMaps se usan para almacenar datos de configuración no confidenciales como pares clave-valor.
-metadata:: Contiene metadatos para el ConfigMap.
-name: -config: Establece el nombre del ConfigMap.  es una plantilla común en Helm que inserta el nombre del lanzamiento actual. Así, el nombre del ConfigMap será el nombre de tu lanzamiento de Helm seguido de -config.
-data:: Contiene los datos de configuración que se almacenarán en el ConfigMap.
-example.property: value: Es un par clave-valor de ejemplo. example.property es la clave y value es el valor asociado. Puedes añadir múltiples pares clave-valor aquí para almacenar diferentes configuraciones.
+## apiVersion: 
+### v1:
+Indica la versión de la API de Kubernetes que se está utilizando.
+## kind: ConfigMap: 
+Especifica que este recurso es un ConfigMap. Los ConfigMaps se usan para almacenar datos de configuración no confidenciales como pares clave-valor.
+## metadata::
+Contiene metadatos para el ConfigMap.
+## name:
+-config: Establece el nombre del ConfigMap.  es una plantilla común en Helm que inserta el nombre del lanzamiento actual. Así, el nombre del ConfigMap será el nombre de tu lanzamiento de Helm seguido de -config.
+## data:
+Contiene los datos de configuración que se almacenarán en el ConfigMap.
+## example.property:
+### value:
+Es un par clave-valor de ejemplo. example.property es la clave y value es el valor asociado. Puedes añadir múltiples pares clave-valor aquí para almacenar diferentes configuraciones.
 En resumen, este código crea un ConfigMap llamado dinámicamente según el nombre de tu lanzamiento de Helm, y almacena una única configuración con la clave example.property y el valor value. Este ConfigMap puede ser luego montado o referenciado po
 
 # hpa.yaml
 
-ste código es una plantilla para crear un Horizontal Pod Autoscaler (HPA) en Kubernetes utilizando Helm.
+este código es una plantilla para crear un Horizontal Pod Autoscaler (HPA) en Kubernetes utilizando Helm.
 
 : Esto es una condición de Helm. Significa que el resto del código dentro de este bloque solo se incluirá si la variable hpa.enabled en tu archivo values.yaml de Helm está establecida a true.
 apiVersion: autoscaling/v2 y kind: HorizontalPodAutoscaler: Definen el tipo de recurso de Kubernetes que se está creando, que es un HPA.
