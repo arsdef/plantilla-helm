@@ -103,22 +103,25 @@ En resumen, este código crea un ConfigMap llamado dinámicamente según el nomb
 
 # hpa.yaml
 
-este código es una plantilla para crear un Horizontal Pod Autoscaler (HPA) en Kubernetes utilizando Helm.
+Este código es una plantilla de Kubernetes para crear un Horizontal Pod Autoscaler (HPA).
 
-: Esto es una condición de Helm. Significa que el resto del código dentro de este bloque solo se incluirá si la variable hpa.enabled en tu archivo values.yaml de Helm está establecida a true.
-apiVersion: autoscaling/v2 y kind: HorizontalPodAutoscaler: Definen el tipo de recurso de Kubernetes que se está creando, que es un HPA.
-metadata:: Contiene información sobre el HPA.
-name: -myapp-hpa: Establece el nombre del HPA, usando el nombre de la release de Helm y añadiendo -myapp-hpa.
-namespace: : Establece el namespace donde se creará el HPA, usando el namespace de la release de Helm.
+{{- if .Values.hpa.enabled }} y {{- end }}: Esto es una condición. El HPA solo se creará si la variable hpa.enabled en tus valores de configuración (generalmente en un archivo values.yaml) está establecida a true.
+apiVersion: autoscaling/v2: Especifica la versión de la API de Kubernetes que se está utilizando para el HPA.
+kind: HorizontalPodAutoscaler: Indica que estamos creando un recurso HPA.
+metadata:: Contiene información sobre el recurso HPA.
+name: {{ .Release.Name }}-myapp-hpa: Define el nombre del HPA. Utiliza el nombre de la release de Helm y añade -myapp-hpa.
+namespace: {{ .Release.Namespace }}: Especifica el namespace donde se creará el HPA. Utiliza el namespace de la release de Helm.
 spec:: Define la configuración del HPA.
-scaleTargetRef:: Especifica el recurso de Kubernetes que el HPA debe escalar.
-apiVersion: apps/v1 y kind: Deployment: Indica que el recurso a escalar es un Deployment.
-name: -myapp: Especifica el nombre del Deployment a escalar, usando el nombre de la release de Helm y añadiendo -myapp.
-minReplicas: : Define el número mínimo de pods que el HPA mantendrá. Este valor se toma de la variable hpa.minReplicas en tu archivo values.yaml.
-maxReplicas: : Define el número máximo de pods que el HPA puede escalar. Este valor se toma de la variable hpa.maxReplicas en tu archivo values.yaml.
-targetCPUUtilizationPercentage: : Establece el porcentaje de uso de CPU objetivo para los pods. Si el uso promedio de CPU supera este porcentaje, el HPA aumentará el número de pods (hasta maxReplicas). Este valor se toma de la variable hpa.targetCPUUtilizationPercentage en tu archivo values.yaml.
-: Cierra el bloque condicional de Helm.
-En resumen, esta plantilla crea un HPA que automáticamente ajusta el número de pods de un Deployment llamado [nombre-de-la-release]-myapp en función de la utilización de la CPU, manteniendo el número de pods entre un mínimo y un máximo definidos en tu archivo values.yaml. Solo se creará si la opción HPA está habilitada en tu configuración de Helm.
+scaleTargetRef:: Indica qué recurso debe escalar el HPA.
+apiVersion: apps/v1: La versión de la API del recurso objetivo.
+kind: Deployment: El tipo de recurso objetivo (en este caso, un Deployment).
+name: {{ .Release.Name }}-myapp: El nombre del recurso objetivo a escalar. Utiliza el nombre de la release de Helm y añade -myapp.
+minReplicas: {{ .Values.hpa.minReplicas }}: El número mínimo de réplicas (pods) que el HPA mantendrá. Este valor se obtiene de los valores de configuración.
+maxReplicas: {{ .Values.hpa.maxReplicas }}: El número máximo de réplicas (pods) al que el HPA puede escalar. Este valor se obtiene de los valores de configuración.
+targetCPUUtilizationPercentage: {{ .Values.hpa.targetCPUUtilizationPercentage }}: El porcentaje de utilización de CPU objetivo para escalar. Cuando la utilización media de CPU de los pods excede este porcentaje, el HPA aumenta el número de réplicas. Este valor se obtiene de los valores de configuración.
+En resumen, este código crea un HPA que automáticamente ajustará el número de pods de un Deployment llamado [nombre-de-la-release]-myapp basándose en la utilización de CPU, siempre y cuando el HPA esté habilitado en los valores de configuración. El número de pods se mantendrá entre minReplicas y maxReplicas.
+
+
 
 # job.yaml
 
