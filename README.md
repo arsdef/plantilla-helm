@@ -1,9 +1,9 @@
 
-myapp-helm-chart/
-  ├── charts/
-  ├── values.yaml
-  ├── templates/
-  ├── Chart.yaml
+# myapp-helm-chart/
+  ## ├── charts/
+  ## ├── values.yaml
+  ## ├── templates/
+  ## ├── Chart.yaml
 charts/: subcharts de Helm si los tienes.
 
 values.yaml: archivo de valores parametrizados.
