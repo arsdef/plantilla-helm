@@ -37,30 +37,49 @@ En resumen, este código define la configuración necesaria para desplegar una a
 
 # deploiment.yaml
 
-Este código es una plantilla de **Helm** para desplegar una aplicación en **Kubernetes**.
-
--   Comienza con una condición (``) que indica que el resto del código solo se procesará si la variable `app.enabled` en el archivo `values.yaml` es `true`.
--   Define un objeto de Kubernetes de tipo **Deployment** (despliegue).
--   Le asigna un nombre al despliegue usando el nombre de la versión de Helm (`.Release.Name`) y un sufijo (`-myapp`).
--   Establece etiquetas para identificar el despliegue.
--   Configura el número de réplicas (pods) que se ejecutarán, obteniéndolo de `.Values.app.replicaCount`.
--   Define un selector que permite al despliegue encontrar los pods que gestiona, basándose en la etiqueta `app`.
--   Configura la plantilla para los pods:
-    -   Les asigna etiquetas para que coincidan con el selector del despliegue.
-    -   Define el contenedor principal (`myapp`) dentro del pod:
-        -   Especifica la imagen del contenedor, su repositorio y etiqueta, obteniéndolos de `.Values.app.image`.
-        -   Define la política de extracción de la imagen (`imagePullPolicy`).
-        -   Expone el puerto de la aplicación, tomado de `.Values.app.service.port`.
-        -   Configura variables de entorno:
-            -   Itera sobre una lista de variables de entorno definidas en `.Values.env`.
-            -   Agrega variables de entorno específicas para `VAULT_TOKEN` (obtenida de un Secret de Kubernetes) y `VAULT_ADDR`.
-        -   Opcionalmente, configura los sondeos de liveness (para verificar si la aplicación sigue viva) y readiness (para verificar si la aplicación está lista para recibir tráfico), si están habilitados en `.Values.probes`.
-        -   Define los límites y solicitudes de recursos (CPU y memoria) para el contenedor.
-    -   Permite configurar `nodeSelector`, `tolerations` y `affinity` para controlar dónde se despliegan los pods, obteniendo sus valores de `.Values`.
-    -   Establece la política de reinicio de los pods a `Always`.
--   El código termina con la condición de cierre (``).
-
-En resumen, esta plantilla crea un despliegue de Kubernetes para una aplicación, configurando aspectos como el número de réplicas, la imagen del contenedor, variables de entorno, sondeos de salud, recursos y políticas de despliegue, basándose en los valores proporcionados en el archivo `values.yaml` de Helm. Solo se creará el despliegue si `app.enabled` es `true`.
+## Condición de habilitación:
+{{- if .Values.app.enabled }}: Este Deployment solo se creará si el valor app.enabled en tus archivos de configuración (values.yaml en Helm) es verdadero.
+## Tipo de recurso:
+## apiVersion: apps/v1, kind:
+Deployment: Define que este código crea un objeto de tipo Deployment en Kubernetes.
+## Metadatos:
+metadata: Define el nombre ({{ .Release.Name }}-myapp) y etiquetas (app: {{ .Release.Name }}) para el Deployment. {{ .Release.Name }} es una variable que se reemplazará por el nombre del lanzamiento de Helm.
+## Especificación del Deployment:
+spec: Configura cómo debe funcionar el Deployment.
+## replicas:
+{{ .Values.app.replicaCount }}: Indica cuántas copias (pods) de la aplicación deben ejecutarse, según el valor app.replicaCount.
+## selector:
+## matchLabels:
+app: {{ .Release.Name }}-myapp: Define qué pods son gestionados por este Deployment, basándose en la etiqueta app.
+## template:
+Define la plantilla para los pods que se crearán.
+## metadata: labels: 
+app: {{ .Release.Name }}-myapp: Etiquetas para los pods.
+## spec:
+Especificación del pod.
+## containers:
+Define los contenedores dentro del pod.
+- name: myapp: Nombre del contenedor.
+## image:
+"{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}": Especifica la imagen del contenedor a usar, obteniendo el repositorio y la etiqueta de tus valores de configuración.
+## imagePullPolicy:
+{{ .Values.app.image.pullPolicy }}: Define cuándo se debe descargar la imagen (por ejemplo, IfNotPresent, Always).
+## ports:
+- containerPort: {{ .Values.app.service.port }}: Expone el puerto containerPort del contenedor, según el valor app.service.port.
+## env:
+Define las variables de entorno para el contenedor.
+{{- range .Values.env }}: Itera sobre una lista de variables de entorno definidas en values.yaml.
+- name: {{ .name }}, value: {{ .value | quote }}: Define variables de entorno con nombre y valor de la lista. | quote asegura que el valor se formatea correctamente.
+## VAULT_TOKEN, VAULT_ADDR:
+Define variables de entorno específicas para interactuar con HashiCorp Vault, obteniendo el token de un Secret de Kubernetes (secretKeyRef) y la dirección de tus valores de configuración.
+## livenessProbe:
+-readinessProbe::Configuran los sondeos (probes) de liveness y readiness si están habilitados ({{- if .Values.probes.liveness.enabled }} y {{- if .Values.probes.readiness.enabled }}). Estos comprueban la salud de la aplicación.
+-httpGet:: Especifica un sondeo HTTP a una ruta (path) y puerto (port) definidos.
+-initialDelaySeconds:, periodSeconds:, failureThreshold:: Configuran el comportamiento de los sondeos (cuándo empezar, con qué frecuencia comprobar, cuántos fallos antes de considerar el pod no saludable).
+## resources:
+Define los límites y solicitudes de CPU y memoria para el contenedor, según los valores de configuración.
+## nodeSelector:
+{{ .Values.nodeSelector }}: Asigna los pods a nodos específicos con las etiquetas definidas en nodeSelector.
 
 # ConfigMap.yaml
 
