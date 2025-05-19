@@ -105,23 +105,31 @@ En resumen, esta plantilla crea un HPA que automáticamente ajusta el número de
 
 define un Job de Kubernetes que se ejecuta una vez.
 
-Condición: El Job solo se creará si la variable job.enabled en tus valores de configuración está establecida a true.
-Job: Se crea un Job llamado  en el espacio de nombres .
-Contenedor: El Job ejecuta un solo contenedor llamado vault.
-
+## Condición:
+El Job solo se creará si la variable job.enabled en tus valores de configuración está establecida a true.
+## Job:
+Se crea un Job llamado  en el espacio de nombres .
+## Contenedor:
+El Job ejecuta un solo contenedor llamado vault.
 Utiliza la imagen de Docker especificada en .
-Comando: Ejecuta un comando shell (sh -c) que:
+## Comando:
+Ejecuta un comando shell (sh -c) que:
 
 Obtiene un secreto de HashiCorp Vault usando el comando vault kv get.
 Formatea la salida como JSON.
 Utiliza jq para extraer solo los datos del secreto.
 Redirige esa salida a un archivo llamado myapp.json dentro del contenedor, en la ruta /mnt/secrets.
-Variables de Entorno: Define dos variables de entorno esenciales para conectarse a Vault:
-
-VAULT_TOKEN: Obtiene el token de un secreto de Kubernetes llamado  y utiliza la clave  dentro de ese secreto.
-VAULT_ADDR: Establece la dirección de Vault a partir del valor .
-Montaje de Volumen: Monta un volumen llamado secret-volume en la ruta /mnt/secrets dentro del contenedor.
-Volumen: Define el volumen secret-volume como un emptyDir, lo que significa que es un volumen vacío que existe mientras el Pod del Job esté en ejecución.
-Política de Reinicio: La política de reinicio del Pod del Job se establece según el valor de . Si no se especifica, el valor predeterminado es Never (nunca reiniciar si falla).
+## Variables de Entorno:
+Define dos variables de entorno esenciales para conectarse a Vault:
+## VAULT_TOKEN:
+Obtiene el token de un secreto de Kubernetes llamado  y utiliza la clave  dentro de ese secreto.
+## VAULT_ADDR: 
+Establece la dirección de Vault a partir del valor .
+## Montaje de Volumen:
+Monta un volumen llamado secret-volume en la ruta /mnt/secrets dentro del contenedor.
+## Volumen:
+Define el volumen secret-volume como un emptyDir, lo que significa que es un volumen vacío que existe mientras el Pod del Job esté en ejecución.
+## Política de Reinicio:
+La política de reinicio del Pod del Job se establece según el valor de . Si no se especifica, el valor predeterminado es Never (nunca reiniciar si falla).
 
 En resumen, este Job tiene como objetivo conectarse a Vault, descargar un secreto específico y guardarlo en un archivo dentro de un volumen temporal en el Pod que se ejecuta.
